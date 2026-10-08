@@ -50,10 +50,20 @@ export const x402Price = async (amount: string) => {
   return { amount: parseUnits(amount, asset.decimals).toString(), asset };
 };
 
-export const thirdwebFacilitator = facilitator({
-  client: createThirdwebClient({ secretKey: process.env.THIRDWEB_SECRET_KEY! }),
-  serverWalletAddress: process.env.THIRDWEB_SERVER_WALLET_ADDRESS!,
-  waitUntil: "confirmed",
-});
+const requireEnv = (name: string) => {
+  const value = process.env[name];
+  if (!value) throw new Error(`${name} is not set (see packages/nextjs/env.example)`);
+  return value;
+};
 
-export const payTo = process.env.X402_PAY_TO!;
+// Created on the first request, not at import: `next build` imports the route to collect page data,
+// and createThirdwebClient throws when the secret key isn't set (fresh clones, CI, preview deploys).
+let thirdwebFacilitator: ReturnType<typeof facilitator> | undefined;
+export const getFacilitator = () =>
+  (thirdwebFacilitator ??= facilitator({
+    client: createThirdwebClient({ secretKey: requireEnv("THIRDWEB_SECRET_KEY") }),
+    serverWalletAddress: requireEnv("THIRDWEB_SERVER_WALLET_ADDRESS"),
+    waitUntil: "confirmed",
+  }));
+
+export const getPayTo = () => requireEnv("X402_PAY_TO");

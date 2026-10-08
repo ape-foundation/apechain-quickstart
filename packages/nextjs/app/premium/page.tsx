@@ -11,7 +11,7 @@ import { useAccount, useReadContracts, useSwitchChain, useWalletClient } from "w
 import { X402_CHAIN, X402_PRICE, X402_TOKEN_ADDRESS } from "~~/services/x402/config";
 import { getParsedError, notification } from "~~/utils/scaffold-eth";
 
-const thirdwebClient = createThirdwebClient({ clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID! });
+const THIRDWEB_CLIENT_ID = process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID;
 // thirdweb pins its own viem version, so wagmi's WalletClient type doesn't match its parameter type exactly.
 type ThirdwebViemWalletClient = Parameters<typeof viemAdapter.walletClient.fromViem>[0]["walletClient"];
 
@@ -30,9 +30,11 @@ const Premium: NextPage = () => {
   const [data, setData] = useState<unknown>();
   const [isPaying, setIsPaying] = useState(false);
 
-  if (!X402_TOKEN_ADDRESS) {
+  if (!X402_TOKEN_ADDRESS || !THIRDWEB_CLIENT_ID) {
     return (
-      <div className="alert alert-warning m-10 w-auto">Set NEXT_PUBLIC_X402_TOKEN_ADDRESS to enable payments.</div>
+      <div className="alert alert-warning m-10 w-auto">
+        Set NEXT_PUBLIC_X402_TOKEN_ADDRESS and NEXT_PUBLIC_THIRDWEB_CLIENT_ID to enable payments.
+      </div>
     );
   }
 
@@ -43,6 +45,8 @@ const Premium: NextPage = () => {
     try {
       if (chainId !== X402_CHAIN.id) await switchChainAsync({ chainId: X402_CHAIN.id });
       if (!walletClient) throw new Error(`Connect a wallet on ${X402_CHAIN.name}`);
+      // Created here rather than at module scope, where a missing client ID would throw during prerender.
+      const thirdwebClient = createThirdwebClient({ clientId: THIRDWEB_CLIENT_ID });
       // createWalletAdapter wraps the already-connected wagmi account. (viemAdapter.wallet.fromViem
       // returns a disconnected wallet, and wrapFetchWithPayment throws "Wallet not connected".)
       const wallet = createWalletAdapter({

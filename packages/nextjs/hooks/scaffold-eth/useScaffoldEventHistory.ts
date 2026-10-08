@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Abi, AbiEvent, ExtractAbiEventNames } from "abitype";
 import { BlockNumber, GetLogsParameters } from "viem";
-import { hardhat } from "viem/chains";
 import { Config, UsePublicClientReturnType, useBlockNumber, usePublicClient } from "wagmi";
 import { useSelectedNetwork } from "~~/hooks/scaffold-eth";
 import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
@@ -55,7 +54,7 @@ const getEvents = async (
 };
 
 /**
- * @deprecated **Recommended only for local (hardhat/anvil) chains and development.**
+ * @deprecated **Recommended only for development and small block ranges.**
  * It uses getLogs which can overload RPC endpoints (especially on L2s with short block times).
  * For production, use an indexer such as ponder.sh or similar to query contract events efficiently.
  *
@@ -96,13 +95,10 @@ export const useScaffoldEventHistory = <
 }: UseScaffoldEventHistoryConfig<TContractName, TEventName, TBlockData, TTransactionData, TReceiptData>) => {
   const selectedNetwork = useSelectedNetwork(chainId);
 
-  // Runtime warning for non-local chains
   useEffect(() => {
-    if (selectedNetwork.id !== hardhat.id) {
-      console.log(
-        "⚠️ useScaffoldEventHistory is not optimized for production use. It can overload RPC endpoints (especially on L2s)",
-      );
-    }
+    console.log(
+      "⚠️ useScaffoldEventHistory is not optimized for production use. It can overload RPC endpoints (especially on L2s)",
+    );
   }, [selectedNetwork.id]);
 
   const publicClient = usePublicClient({

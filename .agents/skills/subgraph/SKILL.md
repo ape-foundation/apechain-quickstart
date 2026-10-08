@@ -1,6 +1,6 @@
 ---
 name: subgraph
-description: "Integrate The Graph subgraph into a Scaffold-ETH 2 project for indexing blockchain events. Use when the user wants to: index contract events with The Graph, add a subgraph, query onchain data with GraphQL, set up a local graph node, or deploy a subgraph to Subgraph Studio."
+description: "Integrate The Graph subgraph into a Scaffold-ETH 2 project for indexing blockchain events. Use when the user wants to: index contract events with The Graph, add a subgraph, query onchain data with GraphQL, set up a local graph node, or deploy a hosted subgraph on ApeChain or Curtis (Goldsky)."
 ---
 
 # The Graph Subgraph Integration for Scaffold-ETH 2
@@ -11,9 +11,16 @@ Check if `./packages/nextjs/scaffold.config.ts` exists directly in the current w
 
 ## Overview
 
-[The Graph](https://thegraph.com/) is a decentralized indexing protocol for querying blockchain data via GraphQL. A **subgraph** defines which contract events to index, how to transform them, and exposes the indexed data through a GraphQL API. This skill adds a subgraph workspace to SE-2, with a local Graph Node (via Docker) for development and deployment to [Subgraph Studio](https://thegraph.com/studio/) for production.
+[The Graph](https://thegraph.com/) is a decentralized indexing protocol for querying blockchain data via GraphQL. A **subgraph** defines which contract events to index, how to transform them, and exposes the indexed data through a GraphQL API. This skill adds a subgraph workspace to SE-2 that indexes contracts deployed on **Curtis** (testnet) or **ApeChain** (mainnet).
 
-For The Graph's full API reference, see the [official docs](https://thegraph.com/docs/). This skill focuses on the SE-2 integration — the workspace structure, the ABI copy bridge, and local development workflow.
+**Where the subgraph runs.** The Graph's Subgraph Studio and decentralized network don't support ApeChain, so this kit uses:
+
+- **[Goldsky](https://docs.goldsky.com/chains/apechain)** for hosted subgraphs. It runs standard Graph subgraphs (same manifest, schema, mappings and `graph-cli` build) on both chains, with network slugs `apechain-curtis` and `apechain-mainnet`. It has a free tier.
+- **A local Graph Node (Docker)** pointed at the Curtis RPC, for iterating on mappings without redeploying to Goldsky. Optional.
+
+There is no local chain in this kit, so both options index real Curtis (or ApeChain) blocks. Deploy your contracts with `yarn deploy` first.
+
+For The Graph's full API reference, see the [official docs](https://thegraph.com/docs/). This skill focuses on the SE-2 integration — the workspace structure, the ABI copy bridge, and the build/deploy workflow.
 
 ## Dependencies & Scripts
 
@@ -31,11 +38,12 @@ Create `packages/subgraph/package.json`:
     "codegen": "graph codegen",
     "build": "graph build",
     "graph": "graph",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ your-contract",
+    "ship": "yarn abi-copy && yarn codegen && yarn build --network apechain-curtis && goldsky subgraph deploy your-contract/0.0.1 --path .",
+    "ship:mainnet": "yarn abi-copy && yarn codegen && yarn build --network apechain-mainnet && goldsky subgraph deploy your-contract-mainnet/0.0.1 --path .",
     "create-local": "graph create --node http://localhost:8020/ scaffold-eth/your-contract",
     "remove-local": "graph remove --node http://localhost:8020/ scaffold-eth/your-contract",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 scaffold-eth/your-contract",
-    "local-ship": "yarn abi-copy && yarn codegen && yarn build --network localhost && yarn deploy-local",
+    "local-ship": "yarn abi-copy && yarn codegen && yarn build --network apechain-curtis && yarn deploy-local",
     "test": "graph test -d",
     "run-node": "cd graph-node && docker compose up",
     "stop-node": "cd graph-node && docker compose down",
@@ -86,16 +94,20 @@ For querying the subgraph from the frontend via Graph Client:
   "subgraph:create-local": "yarn workspace @se-2/subgraph create-local",
   "subgraph:local-ship": "yarn workspace @se-2/subgraph local-ship",
   "subgraph:run-node": "yarn workspace @se-2/subgraph run-node",
+  "subgraph:ship": "yarn workspace @se-2/subgraph ship",
+  "subgraph:ship:mainnet": "yarn workspace @se-2/subgraph ship:mainnet",
   "subgraph:stop-node": "yarn workspace @se-2/subgraph stop-node",
   "subgraph:test": "yarn workspace @se-2/subgraph test -d"
 }
 ```
 
-## Docker Setup (Local Graph Node)
+`goldsky` is a global CLI, not a package dependency. Install it once with `curl https://goldsky.com | sh` (Windows: `npm install -g @goldskycom/cli`) and run `goldsky login`.
 
-The Graph requires three services: a Graph Node, IPFS, and PostgreSQL. Create `packages/subgraph/graph-node/docker-compose.yml` with these three services:
+## Docker Setup (Local Graph Node, optional)
 
-- **graph-node**: `graphprotocol/graph-node:v0.41.1` — ports 8000 (GraphQL), 8001, 8020 (admin), 8030, 8040. Set `ethereum: "localhost:http://host.docker.internal:8545"` to connect to the local chain. Add `extra_hosts: ["host.docker.internal:host-gateway"]`.
+Skip this section if you only deploy to Goldsky. The local node needs three services: a Graph Node, IPFS, and PostgreSQL. Create `packages/subgraph/graph-node/docker-compose.yml` with these three services:
+
+- **graph-node**: `graphprotocol/graph-node:v0.41.1` — ports 8000 (GraphQL), 8001, 8020 (admin), 8030, 8040. Set `ethereum: "apechain-curtis:https://rpc.curtis.apechain.com"`. The part before the colon is the network name and must match `network:` in `subgraph.yaml`, so the same manifest works locally and on Goldsky. Use a dedicated RPC (e.g. Alchemy's Curtis endpoint) for anything beyond light testing: graph-node makes many requests and the public RPC rate-limits.
 - **ipfs**: `ipfs/kubo:v0.39.0` (not the legacy `ipfs/go-ipfs`) — port 5001, volume `./data/ipfs:/data/ipfs`
 - **postgres**: `postgres` — port 5432, volume `./data/postgres:/var/lib/postgresql/data`. Credentials: user `graph-node`, password `let-me-in`, db `graph-node`. **Must set `POSTGRES_INITDB_ARGS: "--locale=C --encoding=UTF8"`** — graph-node requires the C locale and will panic on startup otherwise.
 
@@ -116,10 +128,12 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: YourContract
-    network: localhost
+    network: apechain-curtis
     source:
       abi: YourContract
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      # Filled in from networks.json by `graph build --network <name>` (written by abi-copy)
+      address: "0x0000000000000000000000000000000000000000"
+      startBlock: 0
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -129,7 +143,7 @@ dataSources:
         - Sender
       abis:
         - name: YourContract
-          file: ./abis/localhost_YourContract.json
+          file: ./abis/YourContract.json
       eventHandlers:
         - event: GreetingChange(indexed address,string,bool,uint256)
           handler: handleGreetingChange
@@ -139,7 +153,8 @@ dataSources:
 **Key fields to update per project:**
 
 - `name` — must match the contract name in `deployedContracts.ts`
-- `address` — auto-updated by `abi-copy` script for localhost
+- `network`, `address`, `startBlock` — don't edit by hand. `abi-copy` writes them to `networks.json` and `graph build --network <name>` copies them into the manifest
+- `startBlock` — matters a lot on a live chain: without it the indexer scans from genesis, which takes hours on Curtis
 - `eventHandlers` — must match the exact Solidity event signatures (parameter names don't matter, types and order do)
 - `entities` — must match what's defined in `schema.graphql`
 
@@ -210,7 +225,7 @@ AssemblyScript compiles to WASM — no closures, no `Array.map/filter/reduce`, n
 
 ## ABI Copy Bridge
 
-The `abi-copy` script bridges SE-2's deployment output to the subgraph. It reads `packages/nextjs/contracts/deployedContracts.ts`, extracts ABIs and addresses for chain ID 31337 (localhost), and writes them to `packages/subgraph/abis/` and `networks.json`.
+The `abi-copy` script bridges SE-2's deployment output to the subgraph. It reads `packages/nextjs/contracts/deployedContracts.ts`, extracts ABIs, addresses and deployment blocks for Curtis (33111) and ApeChain (33139), and writes them to `packages/subgraph/abis/` and `networks.json` under the Graph network names `apechain-curtis` and `apechain-mainnet`.
 
 Create `packages/subgraph/scripts/abi_copy.ts` — this script parses the deployedContracts file, extracts contract data, and publishes it:
 
@@ -222,9 +237,15 @@ import type { Abi } from "viem";
 const DEPLOYED_CONTRACTS_FILE = "../nextjs/contracts/deployedContracts.ts";
 const GRAPH_DIR = "./";
 
+// Chain id → network name used by graph-node and Goldsky
+const GRAPH_NETWORKS: Record<number, string> = {
+  33111: "apechain-curtis",
+  33139: "apechain-mainnet",
+};
+
 function publishContract(
   contractName: string,
-  contractObject: { address: string; abi: Abi },
+  contractObject: { address: string; abi: Abi; deployedOnBlock?: number },
   networkName: string,
 ) {
   const graphConfigPath = `${GRAPH_DIR}/networks.json`;
@@ -233,12 +254,15 @@ function publishContract(
     : {};
 
   if (!graphConfig[networkName]) graphConfig[networkName] = {};
-  graphConfig[networkName][contractName] = { address: contractObject.address };
+  graphConfig[networkName][contractName] = {
+    address: contractObject.address,
+    startBlock: contractObject.deployedOnBlock ?? 0,
+  };
 
   fs.writeFileSync(graphConfigPath, JSON.stringify(graphConfig, null, 2));
   if (!fs.existsSync(`${GRAPH_DIR}/abis`)) fs.mkdirSync(`${GRAPH_DIR}/abis`);
   fs.writeFileSync(
-    `${GRAPH_DIR}/abis/${networkName}_${contractName}.json`,
+    `${GRAPH_DIR}/abis/${contractName}.json`,
     JSON.stringify(contractObject.abi, null, 2),
   );
 }
@@ -255,17 +279,21 @@ async function main() {
     .replace(/(\w+)(?=\s*:)/g, '"$1"')
     .replace(/,(?=\s*[}\]])/g, "");
   const contracts = JSON.parse(json);
-  const localContracts = contracts[31337];
 
-  if (!localContracts) {
-    console.error("No contracts for local network.");
-    return;
+  let published = 0;
+  for (const [chainId, networkName] of Object.entries(GRAPH_NETWORKS)) {
+    const chainContracts = contracts[chainId];
+    if (!chainContracts) continue;
+    for (const name in chainContracts) {
+      publishContract(name, chainContracts[name], networkName);
+      published++;
+    }
   }
-
-  for (const name in localContracts) {
-    publishContract(name, localContracts[name], "localhost");
+  if (published === 0) {
+    console.error("No contracts on Curtis or ApeChain in deployedContracts.ts. Run `yarn deploy` first.");
+    process.exit(1);
   }
-  console.log("Published contracts to subgraph package.");
+  console.log(`Published ${published} contract(s) to the subgraph package.`);
 }
 
 main().catch((e) => {
@@ -286,7 +314,10 @@ sources:
   - name: YourContract
     handler:
       graphql:
-        endpoint: http://localhost:8000/subgraphs/name/scaffold-eth/your-contract
+        # Goldsky (printed by `goldsky subgraph deploy`), e.g.
+        # https://api.goldsky.com/api/public/<project-id>/subgraphs/your-contract/0.0.1/gn
+        # or the local Graph Node: http://localhost:8000/subgraphs/name/scaffold-eth/your-contract
+        endpoint: https://api.goldsky.com/api/public/<project-id>/subgraphs/your-contract/0.0.1/gn
 documents:
   - ./graphql/GetGreetings.gql
 ```
@@ -343,15 +374,19 @@ const GreetingsTable = () => {
 
 ## Gotchas & Common Pitfalls
 
-**Docker must be running.** The local Graph Node, IPFS, and Postgres all run in Docker. If Docker isn't running, `yarn subgraph:run-node` will fail.
+**Don't use Subgraph Studio or `graph deploy --studio`.** The Graph's hosted network doesn't list ApeChain or Curtis, so the deploy is rejected. Use Goldsky (or another Graph-compatible host that supports ApeChain).
+
+**Docker must be running for the local node.** The local Graph Node, IPFS, and Postgres all run in Docker. If Docker isn't running, `yarn subgraph:run-node` will fail. Goldsky deploys don't need Docker.
 
 **`yarn deploy` must run before `yarn subgraph:abi-copy`.** The ABI copy script reads from `deployedContracts.ts` which is generated by the deploy step. If you haven't deployed, there's nothing to copy.
 
-**`local-ship` does everything in one command.** It runs `abi-copy` → `codegen` → `build` → `deploy-local` sequentially. Use this instead of running each step manually.
+**`ship` / `local-ship` do everything in one command.** They run `abi-copy` → `codegen` → `build --network …` → deploy (Goldsky or local node). Use these instead of running each step manually.
+
+**Bump the Goldsky version on every redeploy.** `goldsky subgraph deploy your-contract/0.0.1` fails if that version already exists. Bump the version in the `ship` script (and the Graph Client endpoint), or delete the old one with `goldsky subgraph delete your-contract/0.0.1`.
+
+**Redeploying the contract means re-shipping the subgraph.** A new `yarn deploy` changes the address and start block. Re-run `ship` (with a new version) so the subgraph follows the new contract.
 
 **`create-local` only needs to run once.** It registers the subgraph name with the local Graph Node. Running it again will error with "subgraph already exists." Only re-run after `clean-node`.
-
-**Linux users need `--hostname 0.0.0.0`.** The default Hardhat/Anvil config binds to `127.0.0.1`, which Docker can't reach. Add `--hostname 0.0.0.0` (Hardhat) or `--host 0.0.0.0` (Anvil) to the chain command. You may also need `sudo ufw allow 8545/tcp`.
 
 **Graph Client artifacts must be regenerated after schema changes.** Run `yarn graphclient:build` whenever you change the GraphQL schema or queries. The frontend imports from `~~/.graphclient` which contains generated types.
 
@@ -359,22 +394,25 @@ const GreetingsTable = () => {
 
 ## How to Test
 
-1. `yarn chain` — start local blockchain
-2. `yarn deploy` — deploy contracts (generates `deployedContracts.ts`)
-3. `yarn subgraph:run-node` — start Docker Graph Node (keep this terminal open)
-4. `yarn subgraph:create-local` — register subgraph (once only)
-5. `yarn subgraph:local-ship` — copies ABIs, generates types, builds, and deploys
-6. Visit `http://localhost:8000/subgraphs/name/scaffold-eth/your-contract/graphql` — test GraphQL queries
-7. `yarn graphclient:build` — generate frontend client artifacts
-8. `yarn start` — visit the subgraph page to see indexed data
-9. `yarn subgraph:test` — run Matchstick unit tests
+1. `yarn deploy` — deploy contracts to Curtis (generates `deployedContracts.ts` with the address and `deployedOnBlock`)
+2. `yarn subgraph:abi-copy` — check that `packages/subgraph/networks.json` has an `apechain-curtis` entry with the right address and `startBlock`
+3. `yarn subgraph:test` — run Matchstick unit tests (no chain needed)
 
-### Deploying to Subgraph Studio
+### Deploying to Goldsky (recommended)
 
-1. Update `subgraph.yaml`: change `network` from `localhost` to target network (e.g., `sepolia`), add deployed `address` and `startBlock`
-2. Create a subgraph on [Subgraph Studio](https://thegraph.com/studio/)
-3. `yarn graph auth --studio <DEPLOY_KEY>`
-4. `yarn graph deploy --studio <SUBGRAPH_SLUG>`
-5. Update the Graph Client endpoint in `.graphclientrc.yml` to point to the Studio URL
+1. Install the CLI and run `goldsky login` (see Dependencies & Scripts)
+2. `yarn subgraph:ship` — copies ABIs, generates types, builds for `apechain-curtis`, and deploys to Goldsky. The CLI prints the GraphQL endpoint
+3. Open the endpoint in a browser and run a query once indexing catches up (the Goldsky dashboard shows progress)
+4. Put the endpoint in `packages/nextjs/.graphclientrc.yml`, run `yarn graphclient:build`, then `yarn start` and visit the subgraph page
 
-For the full list of [supported networks](https://thegraph.com/docs/networks), check The Graph docs.
+For mainnet, `yarn deploy --network apechain`, then `yarn subgraph:ship:mainnet`.
+
+### Local Graph Node (optional)
+
+1. `yarn subgraph:run-node` — start the Docker Graph Node indexing Curtis (keep this terminal open)
+2. `yarn subgraph:create-local` — register subgraph (once only)
+3. `yarn subgraph:local-ship` — copies ABIs, generates types, builds, and deploys to the local node
+4. Visit `http://localhost:8000/subgraphs/name/scaffold-eth/your-contract/graphql` — test GraphQL queries
+5. Point `.graphclientrc.yml` at that URL, run `yarn graphclient:build` and `yarn start`
+
+Events only show up after you send transactions to the contract on Curtis (e.g. `setGreeting` from the Debug Contracts page with Glyph).

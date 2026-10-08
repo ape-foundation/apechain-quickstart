@@ -108,17 +108,20 @@ await showCallsStatusAsync({ id: batchId });
 **Graceful degradation is critical.** The UI must work for both EIP-5792 and non-EIP-5792 wallets:
 - Use SE-2's `useScaffoldWriteContract` for individual calls as fallback
 - Only show/enable the batch button when `useCapabilities` succeeds (`isEIP5792Wallet`)
-- Consider a "switch to Coinbase Wallet" prompt for unsupported wallets
+- For unsupported wallets, show the individual calls (or a hint to connect an EIP-5792 wallet) instead of a broken batch button
 
 **Capabilities vary by chain.** Always check `walletCapabilities?.[chainId]` for the specific chain, not just whether the wallet is EIP-5792 compliant in general.
 
-**SE-2's burner wallet supports EIP-5792** with sequential (non-atomic) calls. Advanced capabilities like paymasters require a live testnet with a compliant wallet (Coinbase Wallet has the most complete implementation).
+**Glyph, the kit's primary wallet, doesn't appear to support EIP-5792.** Neither `@use-glyph/sdk-react` nor Privy's cross-app connector references `wallet_sendCalls` or `wallet_getCapabilities` (checked October 2026), so expect `useCapabilities` to fail for Glyph users and the fallback path to be what they see. Re-check after Glyph SDK upgrades. If you'd rather batch-or-fallback in one call, wagmi's `useSendCalls` takes `experimental_fallback: true`, which sends the calls one by one with `eth_sendTransaction` when the wallet lacks EIP-5792. The user then confirms each call separately, and it isn't atomic.
 
-**Paymaster integration (ERC-7677) is optional.** If you want gas sponsorship, you need a paymaster service URL passed as a `capability` in the `writeContracts` call. The paymaster service is external to SE-2.
+**There's no burner wallet or local chain in this kit.** Test batching on Curtis with a wallet that supports EIP-5792 and lets you add Curtis (chain 33111) as a custom network. Support differs by wallet and by chain, so trust `useCapabilities` for the connected chain, not a wallet's general marketing.
+
+**Paymaster integration (ERC-7677) is optional.** If you want gas sponsorship, you need a paymaster service URL passed as a `capability` in the `writeContracts` call. The paymaster service is external to SE-2 and must support ApeChain/Curtis (chain 33139/33111), so check that before wiring it up.
 
 ## How to Test
 
 1. Deploy the contract: `yarn deploy`
 2. Start the frontend: `yarn start`
-3. For basic batching: use any wallet on localhost (SE-2's burner wallet works)
-4. For advanced capabilities (paymasters, atomic execution): deploy to a live testnet and connect with an [EIP-5792 compliant wallet](https://www.eip5792.xyz/ecosystem/wallets)
+3. Fallback path: connect with **Glyph** on Curtis. The batch button should be hidden (or use the `experimental_fallback` flow) and the individual `useScaffoldWriteContract` calls should work
+4. Batch path: connect an [EIP-5792 compliant wallet](https://www.eip5792.xyz/ecosystem/wallets) on Curtis. `useCapabilities` should return capabilities for chain 33111 and the batch should go through as one wallet request
+5. Paymasters / atomic execution: only if the wallet reports them for Curtis in `useCapabilities`

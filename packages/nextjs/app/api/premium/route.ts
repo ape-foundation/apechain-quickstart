@@ -1,16 +1,16 @@
 import { settlePayment } from "thirdweb/x402";
 import { X402_PRICE } from "~~/services/x402/config";
-import { X402_NETWORK, payTo, thirdwebFacilitator, x402Price } from "~~/services/x402/server";
+import { X402_NETWORK, getFacilitator, getPayTo, x402Price } from "~~/services/x402/server";
 
 export async function GET(request: Request) {
   const result = await settlePayment({
     resourceUrl: request.url,
     method: "GET",
     paymentData: request.headers.get("PAYMENT-SIGNATURE") ?? request.headers.get("X-PAYMENT"),
-    payTo,
+    payTo: getPayTo(),
     network: X402_NETWORK,
     price: await x402Price(X402_PRICE),
-    facilitator: thirdwebFacilitator,
+    facilitator: getFacilitator(),
   });
 
   if (result.status !== 200) {

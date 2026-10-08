@@ -152,13 +152,23 @@ export const x402Price = async (amount: string) => {
   return { amount: parseUnits(amount, asset.decimals).toString(), asset };
 };
 
-export const thirdwebFacilitator = facilitator({
-  client: createThirdwebClient({ secretKey: process.env.THIRDWEB_SECRET_KEY! }),
-  serverWalletAddress: process.env.THIRDWEB_SERVER_WALLET_ADDRESS!,
-  waitUntil: "confirmed",
-});
+const requireEnv = (name: string) => {
+  const value = process.env[name];
+  if (!value) throw new Error(`${name} is not set (see packages/nextjs/env.example)`);
+  return value;
+};
 
-export const payTo = process.env.X402_PAY_TO!;
+// Created on the first request, not at import: `next build` imports the route to collect page data,
+// and createThirdwebClient throws when the secret key isn't set (fresh clones, CI, preview deploys).
+let thirdwebFacilitator: ReturnType<typeof facilitator> | undefined;
+export const getFacilitator = () =>
+  (thirdwebFacilitator ??= facilitator({
+    client: createThirdwebClient({ secretKey: requireEnv("THIRDWEB_SECRET_KEY") }),
+    serverWalletAddress: requireEnv("THIRDWEB_SERVER_WALLET_ADDRESS"),
+    waitUntil: "confirmed",
+  }));
+
+export const getPayTo = () => requireEnv("X402_PAY_TO");
 ```
 
 Don't hardcode the token's EIP-712 domain or decimals. `x402Price` reads `name()`, `version()` and `decimals()` from the configured token and checks the domain against its `DOMAIN_SEPARATOR()`, so swapping tokens is an env change. A wrong domain makes the token reject every signature (`FiatTokenV2: invalid signature`); for USDC.e the name is `"Bridged USDC (Stargate)"`, not `"USD Coin"`. The token must implement EIP-3009 (`transferWithAuthorization`) plus `version()` and `DOMAIN_SEPARATOR()`, as Circle's FiatToken does.
@@ -171,17 +181,17 @@ Gate each route in its handler with `settlePayment`. This keeps the secret key i
 // packages/nextjs/app/api/premium/route.ts
 import { settlePayment } from "thirdweb/x402";
 import { X402_PRICE } from "~~/services/x402/config";
-import { X402_NETWORK, payTo, thirdwebFacilitator, x402Price } from "~~/services/x402/server";
+import { X402_NETWORK, getFacilitator, getPayTo, x402Price } from "~~/services/x402/server";
 
 export async function GET(request: Request) {
   const result = await settlePayment({
     resourceUrl: request.url,
     method: "GET",
     paymentData: request.headers.get("PAYMENT-SIGNATURE") ?? request.headers.get("X-PAYMENT"),
-    payTo,
+    payTo: getPayTo(),
     network: X402_NETWORK,
     price: await x402Price(X402_PRICE),
-    facilitator: thirdwebFacilitator,
+    facilitator: getFacilitator(),
   });
 
   if (result.status !== 200) {
@@ -213,7 +223,7 @@ import { useAccount, useReadContracts, useSwitchChain, useWalletClient } from "w
 import { X402_CHAIN, X402_PRICE, X402_TOKEN_ADDRESS } from "~~/services/x402/config";
 import { getParsedError, notification } from "~~/utils/scaffold-eth";
 
-const thirdwebClient = createThirdwebClient({ clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID! });
+const THIRDWEB_CLIENT_ID = process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID;
 // thirdweb pins its own viem version, so wagmi's WalletClient type doesn't match its parameter type exactly.
 type ThirdwebViemWalletClient = Parameters<typeof viemAdapter.walletClient.fromViem>[0]["walletClient"];
 
@@ -232,9 +242,11 @@ const Premium: NextPage = () => {
   const [data, setData] = useState<unknown>();
   const [isPaying, setIsPaying] = useState(false);
 
-  if (!X402_TOKEN_ADDRESS) {
+  if (!X402_TOKEN_ADDRESS || !THIRDWEB_CLIENT_ID) {
     return (
-      <div className="alert alert-warning m-10 w-auto">Set NEXT_PUBLIC_X402_TOKEN_ADDRESS to enable payments.</div>
+      <div className="alert alert-warning m-10 w-auto">
+        Set NEXT_PUBLIC_X402_TOKEN_ADDRESS and NEXT_PUBLIC_THIRDWEB_CLIENT_ID to enable payments.
+      </div>
     );
   }
 
@@ -245,6 +257,8 @@ const Premium: NextPage = () => {
     try {
       if (chainId !== X402_CHAIN.id) await switchChainAsync({ chainId: X402_CHAIN.id });
       if (!walletClient) throw new Error(`Connect a wallet on ${X402_CHAIN.name}`);
+      // Created here rather than at module scope, where a missing client ID would throw during prerender.
+      const thirdwebClient = createThirdwebClient({ clientId: THIRDWEB_CLIENT_ID });
       // createWalletAdapter wraps the already-connected wagmi account. (viemAdapter.wallet.fromViem
       // returns a disconnected wallet, and wrapFetchWithPayment throws "Wallet not connected".)
       const wallet = createWalletAdapter({

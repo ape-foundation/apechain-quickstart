@@ -9,9 +9,6 @@ contract ScaffoldETHDeploy is Script {
     error DeployerHasNoBalance();
     error InvalidPrivateKey(string);
 
-    event AnvilSetBalance(address account, uint256 amount);
-    event FailedAnvilRequest();
-
     struct Deployment {
         string name;
         address addr;
@@ -20,7 +17,6 @@ contract ScaffoldETHDeploy is Script {
     string root;
     string path;
     Deployment[] public deployments;
-    uint256 constant ANVIL_BASE_BALANCE = 10000 ether;
 
     /// @notice The deployer address for every run
     address deployer;
@@ -39,14 +35,6 @@ contract ScaffoldETHDeploy is Script {
     function _startBroadcast() internal returns (address) {
         vm.startBroadcast();
         (, address _deployer,) = vm.readCallers();
-
-        if (block.chainid == 31337 && _deployer.balance == 0) {
-            try vm.deal(_deployer, ANVIL_BASE_BALANCE) {
-                emit AnvilSetBalance(_deployer, ANVIL_BASE_BALANCE);
-            } catch {
-                emit FailedAnvilRequest();
-            }
-        }
         return _deployer;
     }
 

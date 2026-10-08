@@ -49,9 +49,6 @@ export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
   [chains.apeChain.id]: {
     color: ["#0054fa", "#6fa3ff"],
   },
-  [chains.hardhat.id]: {
-    color: "#b8af0c",
-  },
   [chains.mainnet.id]: {
     color: "#ff8b9e",
   },

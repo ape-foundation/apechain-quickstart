@@ -6304,44 +6304,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rocketh/core@npm:0.22.0":
-  version: 0.22.0
-  resolution: "@rocketh/core@npm:0.22.0"
+"@rocketh/deploy@npm:0.19.18":
+  version: 0.19.18
+  resolution: "@rocketh/deploy@npm:0.19.18"
   dependencies:
+    "@rocketh/core": "npm:0.19.13"
     abitype: "npm:^1.3.0"
     eip-1193: "npm:^0.6.5"
     named-logs: "npm:^0.4.1"
     viem: "npm:^2.55.13"
-  checksum: 10/a4698211ec577ad891802b99f1e172ec109b8674a355338129839839465253eae19691c7d444e44e64d9f467f5b09a5913a99787e35a4c8dd249d7a5ed185d3c
+  checksum: 10/50de8d7c1f84c93c6406795e63b0250009e97be08e484fbe7425342c8548dc997a768047b874f371edd24ed682c7874dd1c7d94b986ceaf6fecead243c9a51aa
   languageName: node
   linkType: hard
 
-"@rocketh/core@npm:0.23.1":
-  version: 0.23.1
-  resolution: "@rocketh/core@npm:0.23.1"
-  dependencies:
-    abitype: "npm:^1.3.0"
-    eip-1193: "npm:^0.6.5"
-    named-logs: "npm:^0.4.1"
-    viem: "npm:^2.55.13"
-  checksum: 10/227a001bb979b879c15549be14fdea3e5a92cbafd5d71ad7ec709d761eb92f49bf9780f9ceb487592a6aae0ad0c4c3c664391c051f586194e76ae6463320e44b
-  languageName: node
-  linkType: hard
-
-"@rocketh/deploy@npm:^0.19.7":
-  version: 0.19.22
-  resolution: "@rocketh/deploy@npm:0.19.22"
-  dependencies:
-    "@rocketh/core": "npm:0.22.0"
-    abitype: "npm:^1.3.0"
-    eip-1193: "npm:^0.6.5"
-    named-logs: "npm:^0.4.1"
-    viem: "npm:^2.55.13"
-  checksum: 10/faf3395c59f9c46457825f061a4b0c15b495a100a5613b67e7ff25943a0bf8af8e315cf03941e5e97a5b49d0e61ef6a95532a96aabea652d8c7e3d3f1bd7be0e
-  languageName: node
-  linkType: hard
-
-"@rocketh/node@npm:^0.19.7":
+"@rocketh/node@npm:0.19.22":
   version: 0.19.22
   resolution: "@rocketh/node@npm:0.19.22"
   dependencies:
@@ -6364,7 +6340,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rocketh/read-execute@npm:^0.19.3":
+"@rocketh/read-execute@npm:0.19.13":
   version: 0.19.13
   resolution: "@rocketh/read-execute@npm:0.19.13"
   dependencies:
@@ -6377,22 +6353,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rocketh/signer@npm:^0.19":
-  version: 0.19.19
-  resolution: "@rocketh/signer@npm:0.19.19"
+"@rocketh/signer@npm:0.19.13":
+  version: 0.19.13
+  resolution: "@rocketh/signer@npm:0.19.13"
   dependencies:
-    "@rocketh/core": "npm:0.23.1"
+    "@rocketh/core": "npm:0.19.13"
     eip-1193: "npm:^0.6.5"
-    eip-1193-signer: "npm:^0.2.0"
-  checksum: 10/23e07950090d19d88065789257808a2479c756af7945cff55da2138cc64aedd7b3dc18b0689eb2e889a584e4dffb0d9ddd634f420b59caca223fc1efa5e68529
+    eip-1193-signer: "npm:^0.1.1"
+  checksum: 10/f6e4df967c2d906fb7721a450208aa83733b4681660b3e5ba9c772d375bf3b00c81f01241d4c0bf30a97954d1b0336aceea591034c024a50aaf95f8d1b11e1f5
   languageName: node
   linkType: hard
 
-"@rocketh/verifier@npm:^0.19.4":
-  version: 0.19.28
-  resolution: "@rocketh/verifier@npm:0.19.28"
+"@rocketh/verifier@npm:0.19.23":
+  version: 0.19.23
+  resolution: "@rocketh/verifier@npm:0.19.23"
   dependencies:
-    "@rocketh/core": "npm:0.23.1"
+    "@rocketh/core": "npm:0.19.13"
     "@types/fs-extra": "npm:^11.0.4"
     "@types/qs": "npm:^6.15.1"
     chalk: "npm:6.0.0"
@@ -6401,10 +6377,10 @@ __metadata:
     ldenv: "npm:^0.6.0"
     neoqs: "npm:^6.13.0"
   peerDependencies:
-    "@rocketh/node": ^0.21.3
+    "@rocketh/node": ^0.19.22
   bin:
     rocketh-verify: dist/cli.js
-  checksum: 10/a8a9b1998a8910b3fb84a28f0ef327e564c86730f8d5b0948aeb11ee4cee68c64fb45eb960c10779215a95cc2a0a35283de75e0b6be04d3c3fa30f4ede7b8068
+  checksum: 10/a177ca1e5628af962d7a027770446cc21ee64bbf2a1daf85ae5c1ffaf1b57e12b491e025d4dbe395a1e2e6deac88ad62e8f2a6c3075389837d02274d4148809a
   languageName: node
   linkType: hard
 
@@ -6723,11 +6699,11 @@ __metadata:
     "@nomicfoundation/hardhat-verify": "npm:^3"
     "@nomicfoundation/ignition-core": "npm:^3"
     "@openzeppelin/contracts": "npm:^5.0.2"
-    "@rocketh/deploy": "npm:^0.19.7"
-    "@rocketh/node": "npm:^0.19.7"
-    "@rocketh/read-execute": "npm:^0.19.3"
-    "@rocketh/signer": "npm:^0.19"
-    "@rocketh/verifier": "npm:^0.19.4"
+    "@rocketh/deploy": "npm:0.19.18"
+    "@rocketh/node": "npm:0.19.22"
+    "@rocketh/read-execute": "npm:0.19.13"
+    "@rocketh/signer": "npm:0.19.13"
+    "@rocketh/verifier": "npm:0.19.23"
     "@types/eslint": "npm:^9.6.1"
     "@types/mocha": "npm:^10.0.10"
     "@types/prettier": "npm:^3.0.0"
@@ -6742,12 +6718,12 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.2.4"
     ethers: "npm:^6.13.2"
     hardhat: "npm:^3.4.5"
-    hardhat-deploy: "npm:^2.0.6"
+    hardhat-deploy: "npm:2.0.24"
     mocha: "npm:^11"
     prettier: "npm:^3.5.3"
     prettier-plugin-solidity: "npm:^1.4.1"
     qrcode: "npm:^1.5.4"
-    rocketh: "npm:^0.19.7"
+    rocketh: "npm:0.19.20"
     tsx: "npm:^4.21.0"
     typescript: "npm:^5.8.2"
   languageName: unknown
@@ -6777,7 +6753,6 @@ __metadata:
     abitype: "npm:1.2.4"
     bgipfs: "npm:~0.0.18"
     blo: "npm:~2.0.0"
-    burner-connector: "npm:0.0.21"
     daisyui: "npm:5.5.19"
     eslint: "npm:~9.39.0"
     eslint-config-next: "npm:~16.2.4"
@@ -11505,17 +11480,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"burner-connector@npm:0.0.21":
-  version: 0.0.21
-  resolution: "burner-connector@npm:0.0.21"
-  dependencies:
-    "@rainbow-me/rainbowkit": "npm:2.2.11"
-    viem: "npm:2.53.1"
-    wagmi: "npm:2.19.5"
-  checksum: 10/0afaa1b0ba2e51ede0057bf8dde2d0c2693c4ce12e2c455ccaba281c4ccacca3d34a60c8df0a20a043511178df2256a0b0e2592b7a872baa0d9d72468d725093
-  languageName: node
-  linkType: hard
-
 "byte-counter@npm:^0.1.0":
   version: 0.1.0
   resolution: "byte-counter@npm:0.1.0"
@@ -12722,12 +12686,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eip-1193-signer@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "eip-1193-signer@npm:0.2.0"
+"eip-1193-signer@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "eip-1193-signer@npm:0.1.1"
   dependencies:
     viem: "npm:^2.23.12"
-  checksum: 10/ebfa4b040e31a6e65764de07098a2747812aa0391f8801a55f2d1c18826126d1625af75dd8e47d964b76bcd4f5634cb7257ad863f6e704e8d6517af64434ed9d
+  checksum: 10/b37a843d98d5d827cf189c9f622929de8fb615c45c9ce9ea89bd2ed257dbbe4068cba638537084bef49c52f5a25b7231d601d72e4d0caa44b617e5d23f637d7e
   languageName: node
   linkType: hard
 
@@ -14797,9 +14761,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat-deploy@npm:^2.0.6":
-  version: 2.0.30
-  resolution: "hardhat-deploy@npm:2.0.30"
+"hardhat-deploy@npm:2.0.24":
+  version: 2.0.24
+  resolution: "hardhat-deploy@npm:2.0.24"
   dependencies:
     "@nomicfoundation/hardhat-zod-utils": "npm:^3.0.4"
     commander: "npm:^15.0.0"
@@ -14807,12 +14771,12 @@ __metadata:
     named-logs-console: "npm:^0.5.1"
     zod: "npm:^3.25.76"
   peerDependencies:
-    "@rocketh/node": ^0.21.4
+    "@rocketh/node": ^0.19.20
     hardhat: ^3.6.0
-    rocketh: ^0.23.0
+    rocketh: ^0.19.18
   bin:
     hardhat-deploy: dist/cli.js
-  checksum: 10/48ac49b4e66023e7929fc51e83595151fcc4e68b2078763e314303cb7b0b135e67e02ce20df567ff456e8ec8a91fa87e434ce7562cbee900315d74b81042e20a
+  checksum: 10/5e1e5013737a10327ea03927b69913f27eca0a2a3155002bad3ffa18fa9e9f867205a0cc8b35ab7c87a0667ab58bb74e993f18071595daeb39aa4e48431bf464
   languageName: node
   linkType: hard
 
@@ -18362,27 +18326,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ox@npm:0.14.29":
-  version: 0.14.29
-  resolution: "ox@npm:0.14.29"
-  dependencies:
-    "@adraffy/ens-normalize": "npm:^1.11.0"
-    "@noble/ciphers": "npm:^1.3.0"
-    "@noble/curves": "npm:1.9.1"
-    "@noble/hashes": "npm:^1.8.0"
-    "@scure/bip32": "npm:^1.7.0"
-    "@scure/bip39": "npm:^1.6.0"
-    abitype: "npm:^1.2.3"
-    eventemitter3: "npm:5.0.1"
-  peerDependencies:
-    typescript: ">=5.4.0"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10/ac267c34e63c2e2e8b7a4e64f4a3635bb11ddaa58f8f7d4140dafbf921dc61379f3c27411d110fdb97a7b9c0b4c8cc420ea2336e055cae4ab351d4708fa0112e
-  languageName: node
-  linkType: hard
-
 "ox@npm:0.14.34":
   version: 0.14.34
   resolution: "ox@npm:0.14.34"
@@ -20214,7 +20157,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rocketh@npm:^0.19.7":
+"rocketh@npm:0.19.20":
   version: 0.19.20
   resolution: "rocketh@npm:0.19.20"
   dependencies:
@@ -22790,27 +22733,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:2.53.1":
-  version: 2.53.1
-  resolution: "viem@npm:2.53.1"
-  dependencies:
-    "@noble/curves": "npm:1.9.1"
-    "@noble/hashes": "npm:1.8.0"
-    "@scure/bip32": "npm:1.7.0"
-    "@scure/bip39": "npm:1.6.0"
-    abitype: "npm:1.2.3"
-    isows: "npm:1.0.7"
-    ox: "npm:0.14.29"
-    ws: "npm:8.20.1"
-  peerDependencies:
-    typescript: ">=5.0.4"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10/82d25e93b9edc9072ae91209277afc68aca61a7f383d13d242d7c1fa422fce83ace517181d710d49203dd31b15e5966bc016da871d3a4f6ab3c6dd69c39757e7
-  languageName: node
-  linkType: hard
-
 "viem@npm:2.56.0":
   version: 2.56.0
   resolution: "viem@npm:2.56.0"
@@ -23215,21 +23137,6 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 10/725964438d752f0ab0de582cd48d6eeada58d1511c3f613485b5598a83680bedac6187c765b0fe082e2d8cc4341fc57707c813ae780feee82d0c5efe6a4c61b6
-  languageName: node
-  linkType: hard
-
-"ws@npm:8.20.1":
-  version: 8.20.1
-  resolution: "ws@npm:8.20.1"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 10/8c4d2b06dc65381b6bfab1f2e584275dabd30a99a5ce058b4dc76f3d03fad1921cef3a21d8f53127d30a808cfd1864aa2fe6890a5d43359f682457315baec873
   languageName: node
   linkType: hard
 
