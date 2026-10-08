@@ -1,0 +1,33 @@
+[profile.default]
+src = 'contracts'
+out = 'out'
+libs = ['lib', 'node_modules']
+fs_permissions = [{ access = "read-write", path = "./"}]
+extra_output = ["evm.bytecode.opcodes"]
+optimizer = true
+optimizer_runs = 200
+
+
+[rpc_endpoints]
+# Public ApeChain RPCs. Swap in your own provider URL (e.g. Alchemy, QuickNode) for production.
+# ApeChain Curtis testnet (chain id 33111)
+curtis = "https://rpc.curtis.apechain.com"
+# ApeChain mainnet (chain id 33139)
+apechain = "https://rpc.apechain.com/http"
+
+[etherscan]
+# ApeScan uses the Etherscan V2 multichain API, so one ETHERSCAN_API_KEY covers both chains.
+curtis = { key = "${ETHERSCAN_API_KEY}", chain = 33111, url = "https://api.etherscan.io/v2/api?chainid=33111" }
+apechain = { key = "${ETHERSCAN_API_KEY}", chain = 33139, url = "https://api.etherscan.io/v2/api?chainid=33139" }
+
+[fmt]
+line_length = 120
+tab_width = 4
+quote_style = "double"
+bracket_spacing = true
+int_types = "long"
+
+
+
+
+# See more config options https://book.getfoundry.sh/reference/config/overview
