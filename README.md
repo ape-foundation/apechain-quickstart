@@ -54,6 +54,14 @@ A [Scaffold-ETH 2](https://scaffoldeth.io) starter kit retargeted to **ApeChain*
 
 There is no local chain in this kit: Glyph is an embedded wallet that can't connect to a localhost node, so you develop against Curtis. Run `yarn test` for fast local contract tests.
 
+### Starting with a coding agent
+
+Point your agent (Claude Code, Cursor, Codex, …) at [`SKILL.md`](SKILL.md) and it will clone the kit into a new project, rename the placeholder contract, and walk you through the deployer account and first deploy:
+
+```
+Read https://raw.githubusercontent.com/ape-foundation/apechain-quickstart/main/SKILL.md and use it to start a new ApeChain project called <name>.
+```
+
 ## Using Hardhat instead of Foundry
 
 Every contract command has a `hardhat:` twin:

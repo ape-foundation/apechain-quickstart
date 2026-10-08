@@ -1,0 +1,10 @@
+{
+  "name": "x402-apechain-e2e",
+  "private": true,
+  "type": "module",
+  "description": "End-to-end x402 test on ApeChain mainnet via thirdweb. Not a workspace; install with npm in this folder.",
+  "dependencies": {
+    "thirdweb": "5.121.6",
+    "viem": "2.56.5"
+  }
+}

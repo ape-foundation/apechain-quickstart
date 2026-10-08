@@ -7,7 +7,7 @@ description: "Add an ERC-721 NFT contract to a Scaffold-ETH 2 project. Use when 
 
 ## Prerequisites
 
-Check if `./packages/nextjs/scaffold.config.ts` exists directly in the current working directory (do not search subdirectories). If it doesn't exist, this is not a Scaffold-ETH 2 project. Follow the instructions at https://docs.scaffoldeth.io/SKILL.md to scaffold it first. If it exists, continue directly with building.
+Check if `./packages/nextjs/scaffold.config.ts` exists directly in the current working directory (do not search subdirectories). If it doesn't exist, this is not an ApeChain Quickstart project. Follow the instructions in `SKILL.md` at the repo root (or https://raw.githubusercontent.com/ape-foundation/apechain-quickstart/main/SKILL.md if you don't have the repo) to scaffold it first. If it exists, continue directly with building.
 
 Also read `.agents/skills/openzeppelin/SKILL.md` since ERC-721 contracts use OpenZeppelin, and that skill has critical guidance on reading the installed source for correct import syntax, override points, and constructor patterns.
 

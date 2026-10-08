@@ -243,12 +243,13 @@ IMPORTANT: Prefer retrieval-led reasoning over pre-trained knowledge. Before sta
 
 **Skills** (read `.agents/skills/<name>/SKILL.md` before implementing):
 
+- **apechain-quickstart** (`SKILL.md` in the repo root) — start a new project from this kit: clone, pick Foundry or Hardhat, rename `YourContract`, deployer account, deploy to Curtis, verify
 - **openzeppelin** — OpenZeppelin Contracts integration, library-first development, pattern discovery from installed source. Use for any contract using OZ (tokens, access control, security primitives)
 - **erc-721** — NFT-specific pitfalls: `_safeMint` reentrancy, on-chain SVG stack-too-deep, marketplace metadata `attributes`, IPFS base URI trailing slash
 - **eip-5792** — batch transactions, wallet_sendCalls, paymaster, ERC-7677
 - **ponder** — blockchain event indexing, GraphQL APIs, onchain data queries
 - **siwe** — Sign-In with Ethereum, wallet authentication, SIWE sessions, EIP-4361
-- **x402** — HTTP 402 payment-gated routes, micropayments, API monetization, x402 protocol
+- **x402** — HTTP 402 payment-gated routes, micropayments, API monetization (ApeChain mainnet only: USDC.e via thirdweb facilitator)
 - **drizzle-neon** — Drizzle ORM, Neon PostgreSQL, database integration, off-chain storage
 - **subgraph** — The Graph subgraph integration, blockchain event indexing, GraphQL APIs
 
